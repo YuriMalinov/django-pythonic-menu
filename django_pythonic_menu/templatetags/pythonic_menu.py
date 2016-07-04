@@ -13,6 +13,6 @@ def render_menu(context, menu_class):
     if issubclass(menu_class, Menu):
         return menu_class.build(request)
     else:
-        (module, class_name) = menu_class.rsplit(menu_class, 1)
+        (module, class_name) = menu_class.rsplit('.', 1)
         clazz = getattr(import_module(module), class_name)
         return clazz.build(request)

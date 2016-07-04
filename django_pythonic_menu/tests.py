@@ -90,3 +90,11 @@ class MenuTest(TestCase):
 
         result = render_menu({'request': r}, SampleMenu)
         self.assertEqual('first_item', result['items'][0]['title'])
+
+    def test_caching(self):
+        class SampleMenu(Menu):
+            first_item = MenuItem('sample')
+
+        SampleMenu.cache_routes()
+
+        self.assertEqual('route:sample', SampleMenu.first_item.cached_url)

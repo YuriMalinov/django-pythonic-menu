@@ -38,10 +38,10 @@ def my_view(request):
 ```
 Extra abilities:
 ==
-* Submenus.
-* Visibility checking.
-* Ability to provide callbacks for urls.
-* Ability to cache & validate routes (to be done).
+* Submenus (just define another Menu inside Menu).
+* Visibility checking (provide `visibility=lambda request, item: request.user.is_staff` argument).
+* Ability to provide callbacks for urls (just pass `callback(request, item)`).
+* Ability to cache & validate routes (call `Menu.cache_routes()` in your `App.ready()` method.
 
 Goals
 ==
