@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='django_pythonic_menu',
-    version='0.0.1',
+    version='0.0.3',
 
     description='Python based menu for django',
     long_description=long_description,
@@ -38,7 +38,9 @@ setup(
     ],
 
     keywords='django menu python',
-    packages=['django_pythonic_menu'],
+    packages=[
+        'django_pythonic_menu',
+        'django_pythonic_menu.templatetags'],
     install_requires=['django', 'six'],
     include_package_data=True,
 )
