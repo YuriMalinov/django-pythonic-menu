@@ -18,7 +18,7 @@ class MenuItem:
         self.items = []
         self.cached_url = False
 
-    def activate(self, f=None, only=False):
+    def activate(self, f=None, only=False, before=True):
         def actual_wrap(f):
             if isinstance(f, type):
                 that = self
@@ -26,8 +26,13 @@ class MenuItem:
 
                 @wraps(old_dispatch)
                 def wrapper(self, request, *args, **kwargs):
+                    if before:
+                        that.activate_for_request(request, only)
+
                     result = old_dispatch(self, request, *args, **kwargs)
-                    that.activate_for_request(request, only)
+
+                    if not before:
+                        that.activate_for_request(request, only)
                     return result
 
                 f.dispatch = wrapper
@@ -35,8 +40,13 @@ class MenuItem:
             else:
                 @wraps(f)
                 def wrapper(request, *args, **kwargs):
+                    if before:
+                        self.activate_for_request(request, only)
+
                     result = f(request, *args, **kwargs)
-                    self.activate_for_request(request, only)
+
+                    if not before:
+                        self.activate_for_request(request, only)
                     return result
 
                 return wrapper

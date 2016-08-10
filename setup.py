@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='django_pythonic_menu',
-    version='0.0.3',
+    version='0.0.5',
 
     description='Python based menu for django',
     long_description=long_description,
