@@ -1,3 +1,5 @@
+import re
+from collections import OrderedDict
 from importlib import import_module
 
 import six
@@ -12,6 +14,7 @@ class MenuItem:
         self.title = title
         self.visibility = visibility
         self.route = route
+        self.name = None
         self.kwargs = kwargs
         self._index = MenuItem._counter
         MenuItem._counter += 1
@@ -71,6 +74,7 @@ class MenuItem:
             'title': self.title,
             'url': self.make_url(request),
             'items': [],
+            'by_name': OrderedDict(),
             'active': hasattr(request, 'active_menus') and self in request.active_menus
         }
         result.update(self.kwargs)
@@ -84,6 +88,7 @@ class MenuItem:
                 result['active'] = 'subitem'
 
             result['items'].append(item)
+            result['by_name'][menu_item.name] = item
 
         return result
 
@@ -126,13 +131,14 @@ class Menu(six.with_metaclass(MenuMeta)):
         menu_items = []
 
         for name, field in cls.__dict__.items():
-            if name.startswith('__'):
+            if name.startswith('__') or name == 'root_item':
                 continue
 
             menu_item = None
             if isinstance(field, MenuItem):
+                field.name = name
                 if field.title is None:
-                    field.title = name
+                    field.title = cls.make_title(name)
                 menu_item = field
             elif isinstance(field, type) and issubclass(field, Menu):
                 field.prepare()
@@ -143,13 +149,12 @@ class Menu(six.with_metaclass(MenuMeta)):
 
         kwargs = {}
         if hasattr(cls, 'Meta'):
-
             for cls_name, cls_field in cls.Meta.__dict__.items():
                 if not cls_name.startswith('__'):
                     kwargs[cls_name] = cls_field
 
         if 'title' not in kwargs:
-            kwargs['title'] = cls.__name__
+            kwargs['title'] = cls.make_title(cls.__name__)
 
         cls.root_item = root_item = MenuItem(**kwargs)
         root_item._index = cls._cls_index
@@ -170,6 +175,16 @@ class Menu(six.with_metaclass(MenuMeta)):
     @classmethod
     def cache_routes(cls):
         cls.root_item.cache_route()
+
+    _uppercase_re = re.compile('([A-Z])')
+
+    @classmethod
+    def make_title(cls, name):
+        name = cls._uppercase_re.sub(' \\1', name)
+        name = name.replace('_', ' ')
+        parts = name.split(' ')
+        result = ' '.join(p.capitalize() for p in parts).strip()
+        return result
 
 
 def build_menu(request, class_or_name):
